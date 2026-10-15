@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus Lost &amp; Found</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--surface:#fff;--ink:#14213d;--muted:#5b6784;--line:#d5dbe7;--tag:#ffc93c;--lost:#d6455d;--found:#1f8a5f;--r:14px}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1626;--surface:#18223a;--ink:#eef1f8;--muted:#9aa6c4;--line:#2b3757;--tag:#ffc93c;--lost:#ff6b83;--found:#4ccf98}}
+*{box-sizing:border-box;margin:0}
+body{font-family:Figtree,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+h1,h2,h3{font-family:'Bricolage Grotesque',Georgia,sans-serif;line-height:1.1}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--tag);outline-offset:2px}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px clamp(16px,5vw,48px);border-bottom:1px solid var(--line);background:var(--surface);position:sticky;top:0;z-index:5}
+.brand{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.2rem;display:flex;gap:10px;align-items:center}
+.brand i{width:22px;height:22px;background:var(--tag);border-radius:6px 6px 6px 14px;display:inline-block;border:2px solid var(--ink)}
+nav{display:flex;gap:10px}
+.btn{font:600 .95rem Figtree,sans-serif;padding:10px 18px;border-radius:999px;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--tag);color:#14213d}
+.btn:hover{transform:translateY(-1px)}
+.hero{padding:clamp(32px,7vw,72px) clamp(16px,5vw,48px) 24px;max-width:1100px;margin:auto}
+.hero h1{font-size:clamp(2.2rem,6vw,4.2rem);font-weight:800;max-width:14ch}
+.hero p{color:var(--muted);margin:14px 0 24px;max-width:52ch;font-size:1.1rem}
+.search{display:flex;gap:8px;max-width:620px}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:11px 14px;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ink)}
+.stats{display:flex;gap:28px;margin-top:22px;color:var(--muted);flex-wrap:wrap}
+.stats b{color:var(--ink);font-size:1.4rem;font-family:'Bricolage Grotesque',sans-serif}
+main{max-width:1100px;margin:auto;padding:12px clamp(16px,5vw,48px) 64px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0}
+.chip{padding:8px 16px;border-radius:999px;border:2px solid var(--line);background:var(--surface);font:500 .92rem Figtree;color:var(--ink);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filters select{width:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px;margin-top:8px}
+.card{background:var(--surface);border-radius:var(--r);border:1px solid var(--line);position:relative;padding:34px 18px 18px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 0 var(--line)}
+.card::before{content:"";position:absolute;top:10px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--bg);border:2px solid var(--line)}
+.thumb{height:130px;border-radius:10px;background:var(--bg);display:grid;place-items:center;font-size:3rem;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.badge{align-self:flex-start;font-weight:600;font-size:.82rem;padding:3px 10px;border-radius:6px;color:#fff}
+.badge.lost{background:var(--lost)}.badge.found{background:var(--found)}
+.card h3{font-size:1.15rem}
+.meta{color:var(--muted);font-size:.9rem}
+.card .btn{margin-top:auto;padding:8px 14px;font-size:.9rem}
+.empty{grid-column:1/-1;text-align:center;padding:48px 16px;color:var(--muted);border:2px dashed var(--line);border-radius:var(--r)}
+dialog{border:none;border-radius:18px;padding:26px;width:min(480px,92vw);background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(10,16,32,.6)}
+dialog h2{margin-bottom:14px}
+label{display:block;font-weight:600;font-size:.92rem;margin:12px 0 5px}
+.row{display:flex;gap:10px}
+.seg{display:flex;gap:8px}
+.seg label{flex:1;margin:0;font-weight:500}
+.seg input{display:none}
+.seg span{display:block;text-align:center;padding:10px;border:2px solid var(--line);border-radius:10px;cursor:pointer}
+.seg input:checked+span{border-color:var(--ink);background:var(--tag);color:#14213d;font-weight:600}
+.seg input:focus-visible+span{outline:3px solid var(--tag);outline-offset:2px}
+.actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.err{color:var(--lost);font-size:.88rem;min-height:1.2em;margin-top:6px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+#toast.on{opacity:1}
+footer{text-align:center;color:var(--muted);padding:24px;border-top:1px solid var(--line);font-size:.9rem}
+@media (max-width:560px){nav .btn.ghost{display:none}.search{flex-direction:column}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.btn:hover{transform:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><i></i>Campus Lost &amp; Found</div>
+  <nav>
+    <button class="btn ghost" data-report="found">I found something</button>
+    <button class="btn primary" data-report="lost">I lost something</button>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Lost it on campus? Check here first.</h1>
+  <p>Search items handed in around the college, or post what you lost so the finder can reach you.</p>
+  <div class="search"><input id="q" type="search" placeholder="Search: blue bottle, calculator, ID card…" aria-label="Search items"></div>
+  <div class="stats">
+    <span><b id="sLost">0</b> still missing</span>
+    <span><b id="sFound">0</b> waiting for an owner</span>
+    <span><b id="sDone">0</b> returned</span>
+  </div>
+</section>
+
+<main>
+  <div class="filters" role="group" aria-label="Filters">
+    <button class="chip" data-type="all" aria-pressed="true">All</button>
+    <button class="chip" data-type="lost" aria-pressed="false">Lost</button>
+    <button class="chip" data-type="found" aria-pressed="false">Found</button>
+    <select id="cat" aria-label="Category"></select>
+  </div>
+  <div class="grid" id="grid" aria-live="polite"></div>
+</main>
+
+<footer>Handed-in items are also kept at the Security Office, Main Block.</footer>
+
+<dialog id="reportDlg">
+  <form id="form" method="dialog" novalidate>
+    <h2 id="formTitle">Report an item</h2>
+    <div class="seg">
+      <label><input type="radio" name="type" value="lost" checked><span>I lost it</span></label>
+      <label><input type="radio" name="type" value="found"><span>I found it</span></label>
+    </div>
+    <label for="title">Item name</label><input id="title" required maxlength="60" placeholder="e.g. Black backpack">
+    <div class="row">
+      <div style="flex:1"><label for="fcat">Category</label><select id="fcat"></select></div>
+      <div style="flex:1"><label for="date">Date</label><input id="date" type="date" required></div>
+    </div>
+    <label for="place">Where</label><input id="place" required maxlength="60" placeholder="e.g. Library, 2nd floor">
+    <label for="desc">Details</label><textarea id="desc" rows="2" maxlength="200" placeholder="Colour, brand, marks. Keep one detail back to verify the owner."></textarea>
+    <label for="contact">Your contact (email or phone)</label><input id="contact" required maxlength="60">
+    <label for="photo">Photo (optional)</label><input id="photo" type="file" accept="image/*">
+    <p class="err" id="err" role="alert"></p>
+    <div class="actions">
+      <button type="button" class="btn" id="cancel">Cancel</button>
+      <button class="btn primary" type="submit">Post item</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="claimDlg">
+  <h2 id="claimTitle"></h2>
+  <p id="claimBody" class="meta" style="font-size:1rem;margin-bottom:6px"></p>
+  <p><b id="claimContact"></b></p>
+  <div class="actions">
+    <button class="btn" id="claimClose">Close</button>
+    <button class="btn primary" id="claimDone">Mark as returned</button>
+  </div>
+</dialog>
+
+<div id="toast" role="status"></div>
+
+<script>
+const CATS={Bags:"🎒",Electronics:"🎧",Books:"📘","ID & cards":"🪪",Keys:"🔑",Clothing:"🧥",Bottles:"🥤",Other:"📦"};
+const KEY="campus-lf-v1";
+const today=(d=0)=>new Date(Date.now()-d*864e5).toISOString().slice(0,10);
+const seed=[
+ {id:1,type:"found",title:"Blue steel water bottle",cat:"Bottles",place:"Canteen",date:today(1),desc:"Dented near the base, sticker on the lid.",contact:"security@college.edu",img:"",done:false},
+ {id:2,type:"lost",title:"Scientific calculator",cat:"Electronics",place:"Exam Hall B",date:today(2),desc:"Casio, name written inside the cover.",contact:"9876543210",img:"",done:false},
+ {id:3,type:"found",title:"Student ID card",cat:"ID & cards",place:"Library entrance",date:today(0),desc:"Final-year student. Come with another ID.",contact:"library@college.edu",img:"",done:false},
+ {id:4,type:"lost",title:"Black laptop bag",cat:"Bags",place:"Bus stop near Gate 2",date:today(3),desc:"Has a charger and a green notebook.",contact:"rahul@student.edu",img:"",done:false},
+ {id:5,type:"found",title:"Bike key with red tag",cat:"Keys",place:"Parking lot",date:today(4),desc:"Two keys on a ring.",contact:"security@college.edu",img:"",done:true}
+];
+let items;
+try{items=JSON.parse(localStorage.getItem(KEY))||seed}catch(e){items=seed}
+let state={type:"all",cat:"All",q:""};
+const $=s=>document.querySelector(s);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function fillSelects(){
+  $("#cat").innerHTML=["All",...Object.keys(CATS)].map(c=>`<option>${c}</option>`).join("");
+  $("#cat").options[0].textContent="All categories";
+  $("#fcat").innerHTML=Object.keys(CATS).map(c=>`<option>${c}</option>`).join("");
+}
+function render(){
+  const q=state.q.toLowerCase();
+  const list=items.filter(i=>!i.done
+    &&(state.type==="all"||i.type===state.type)
+    &&(state.cat==="All"||i.cat===state.cat)
+    &&(!q||[i.title,i.place,i.desc,i.cat].join(" ").toLowerCase().includes(q)))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+  $("#grid").innerHTML=list.length?list.map(i=>`
+    <article class="card">
+      <div class="thumb">${i.img?`<img src="${i.img}" alt="${esc(i.title)}">`:CATS[i.cat]||"📦"}</div>
+      <span class="badge ${i.type}">${i.type==="lost"?"Lost":"Found"}</span>
+      <h3>${esc(i.title)}</h3>
+      <p class="meta">${esc(i.place)} · ${new Date(i.date).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</p>
+      <p class="meta">${esc(i.desc||"")}</p>
+      <button class="btn" data-claim="${i.id}">${i.type==="found"?"This is mine":"I found this"}</button>
+    </article>`).join(""):
+    `<div class="empty"><b>No items match.</b><br>Try a different word, or post the item yourself.</div>`;
+  $("#sLost").textContent=items.filter(i=>!i.done&&i.type==="lost").length;
+  $("#sFound").textContent=items.filter(i=>!i.done&&i.type==="found").length;
+  $("#sDone").textContent=items.filter(i=>i.done).length;
+}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),2400)}
+
+$("#q").addEventListener("input",e=>{state.q=e.target.value;render()});
+$("#cat").addEventListener("change",e=>{state.cat=e.target.value;render()});
+document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+  state.type=b.dataset.type;
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed",c===b));
+  render();
+}));
+
+// Report dialog
+const dlg=$("#reportDlg");
+document.querySelectorAll("[data-report]").forEach(b=>b.addEventListener("click",()=>{
+  $("#form").reset();$("#err").textContent="";
+  $("#date").value=today();$("#date").max=today();
+  document.querySelector(`input[name=type][value=${b.dataset.report}]`).checked=true;
+  dlg.showModal();$("#title").focus();
+}));
+$("#cancel").addEventListener("click",()=>dlg.close());
+
+function readPhoto(file){
+  return new Promise(res=>{
+    if(!file)return res("");
+    const r=new FileReader();
+    r.onload=()=>{const im=new Image();im.onload=()=>{
+      const s=Math.min(1,400/im.width),c=document.createElement("canvas");
+      c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+      res(c.toDataURL("image/jpeg",.7))};im.onerror=()=>res("");im.src=r.result};
+    r.onerror=()=>res("");r.readAsDataURL(file);
+  });
+}
+$("#form").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const v=id=>$(id).value.trim();
+  if(!v("#title")||!v("#place")||!v("#contact")||!$("#date").value){
+    $("#err").textContent="Add an item name, place, date and a way to contact you.";return;
+  }
+  const img=await readPhoto($("#photo").files[0]);
+  items.unshift({id:Date.now(),type:document.querySelector("input[name=type]:checked").value,
+    title:v("#title"),cat:$("#fcat").value,place:v("#place"),date:$("#date").value,
+    desc:v("#desc"),contact:v("#contact"),img,done:false});
+  save();render();dlg.close();toast("Item posted");
+});
+
+// Claim dialog
+let current=null;
+$("#grid").addEventListener("click",e=>{
+  const b=e.target.closest("[data-claim]");if(!b)return;
+  current=items.find(i=>i.id==b.dataset.claim);
+  $("#claimTitle").textContent=current.type==="found"?"Contact the finder":"Contact the owner";
+  $("#claimBody").textContent=current.type==="found"
+    ?"Describe a detail only the owner would know, and bring your college ID when you collect it."
+    :"Tell them where you found it and how to meet on campus.";
+  $("#claimContact").textContent=current.contact;
+  $("#claimDlg").showModal();
+});
+$("#claimClose").addEventListener("click",()=>$("#claimDlg").close());
+$("#claimDone").addEventListener("click",()=>{
+  if(current){current.done=true;save();render();toast("Marked as returned")}
+  $("#claimDlg").close();
+});
+
+fillSelects();render();
+</script>
+</body>
+</html>
